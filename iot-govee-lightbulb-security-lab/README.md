@@ -1,133 +1,124 @@
 # IoT Govee Lightbulb Security Lab
 
-## Overview
+## Executive Summary
 
-This project is a hands-on IoT security lab focused on the **Govee H6008 Wi-Fi + Bluetooth RGBWW LED Smart Bulb**. The goal was to analyze how a consumer smart lightbulb communicates, reproduce legitimate device control from Linux, test security assumptions, and document practical defensive recommendations.
+This project analyzes a **Govee H6008 Wi-Fi + Bluetooth smart bulb** as a consumer IoT security target. The main finding was that device control is **cloud-mediated**, not local: app commands travel to Govee cloud services over HTTPS and are then relayed to the bulb through AWS IoT/MQTT infrastructure.
 
-The lab was completed for **IS-4543: Cyber Attack and Defend** and organized into five milestones:
-
-1. Device setup and network architecture design
-2. Network traffic capture and protocol identification
-3. Reproducing device control from Linux
-4. Security analysis and validation testing
-5. Defensive recommendations and final documentation
-
-## Skills Demonstrated
-
-- IoT device setup and controlled test network design
-- Wireshark and tcpdump packet capture analysis
-- TLS, HTTPS, DNS, MQTT, and BLE traffic analysis
-- REST API interaction from Linux using curl
-- API authentication review and replay testing
-- IoT network segmentation and firewall recommendations
-- Secure handling of API keys and sensitive configuration values
-
-## Target Device
-
-| Attribute | Value |
-| --- | --- |
-| Device | Govee H6008 Smart Bulb |
-| Type | Wi-Fi + Bluetooth RGBWW LED bulb |
-| Wi-Fi | 2.4 GHz only |
-| Bluetooth | Bluetooth Low Energy |
-| Cloud Backend | Govee Cloud and AWS IoT MQTT |
-| Primary App | Govee Home |
-
-## Lab Architecture
-
-The project used a Govee H6008 bulb, a mobile device running the Govee Home app, a Wi-Fi access point, and a Linux analysis machine running tools such as Wireshark, tcpdump, curl, hcitool, and gatttool.
-
-The final architecture showed that control traffic is cloud-mediated rather than LAN-local:
-
-```text
-Govee Home App -> Govee Cloud API over HTTPS 443 -> AWS IoT MQTT Broker -> Govee H6008 Bulb over MQTT/TLS 8883
-```
-
-Bluetooth Low Energy was also used for initial pairing and device discovery.
+The project combined packet capture, protocol analysis, Linux API testing, TLS inspection, replay testing, and defensive recommendations. The public version is sanitized and excludes private packet captures, credentials, API keys, and account-specific identifiers.
 
 ## Key Findings
 
-### 1. The bulb does not use direct LAN control
+| Finding | Evidence | Security Impact |
+| --- | --- | --- |
+| No direct LAN control was observed | App and bulb communication followed a cloud-mediated path using HTTPS and MQTT/TLS. | The device depends on external cloud infrastructure even when the controller and bulb are on the same local network. |
+| TLS encrypted payloads, but metadata remained useful | Packet timing, destination IPs, ports, SNI values, and traffic bursts were still visible. | A network observer may infer device activity even without decrypting payload contents. |
+| Linux could reproduce legitimate control through the vendor API | Owner-authorized API requests changed bulb state from a Linux terminal. | Shows how cloud APIs can become a control plane for IoT devices. |
+| API authentication relied on a static API key | Requests used the `Govee-API-Key` header with no observed nonce, timestamp, or per-request signature. | A leaked key could allow repeated valid commands until revoked. |
+| Raw packet replay was blocked, API-level replay succeeded | TLS prevented network-level replay, but repeated valid API requests were accepted. | Transport security worked, but request-level replay protection was limited. |
+| BLE advertisements remained visible | BLE discovery continued after Wi-Fi pairing. | The device exposes a secondary local discovery surface. |
 
-No direct local control path was observed between the Govee Home app and the bulb. Commands were sent through Govee's cloud infrastructure even when the phone, Linux machine, and bulb were on the same network.
-
-### 2. Traffic is encrypted, but metadata is still useful
-
-Application payloads were protected by TLS, but metadata such as destination IPs, ports, timing, packet counts, and TLS SNI values still provided useful evidence about how the device communicates.
-
-### 3. The Govee Developer API can control the bulb from Linux
-
-Linux curl scripts successfully reproduced legitimate control actions, including:
-
-- Turn bulb on
-- Turn bulb off
-- Set brightness to 50 percent
-- Set brightness to 100 percent
-- Change color to red
-- Change color to white
-
-### 4. API authentication relies heavily on a static key
-
-The Govee Developer API uses an API key passed in the `Govee-API-Key` HTTP header. Testing found no per-request signing, nonce, timestamp, or observed expiration during the project.
-
-### 5. Network-level replay was not successful, but API-level replay was possible
-
-Raw TLS packet replay was not feasible because TLS uses per-session keys and sequence tracking. However, resending the same valid API request with the same API key and body succeeded repeatedly.
-
-### 6. BLE advertisements remain visible
-
-The bulb continued advertising over Bluetooth Low Energy after Wi-Fi pairing, which creates a secondary discovery surface outside normal Wi-Fi monitoring.
-
-## Repository Contents
+## Architecture Observed
 
 ```text
-iot-govee-lightbulb-security-lab/
-├── README.md
-├── SECURITY_NOTES.md
-├── .gitignore
-├── docs/
-│   ├── milestone-1-summary.md
-│   ├── milestone-2-summary.md
-│   ├── milestone-3-summary.md
-│   ├── milestone-4-summary.md
-│   └── milestone-5-summary.md
-└── scripts/
-    ├── get_devices.sh
-    ├── turn_on.sh
-    ├── turn_off.sh
-    ├── brightness_50.sh
-    ├── brightness_100.sh
-    ├── color_red.sh
-    └── color_white.sh
+Govee Home App
+   |
+   | HTTPS / TLS 443
+   v
+Govee Cloud API
+   |
+   | MQTT over TLS 8883
+   v
+AWS IoT MQTT Broker
+   |
+   v
+Govee H6008 Smart Bulb
 ```
 
-## Safe Usage
+Bluetooth Low Energy was used for initial pairing and local discovery behavior.
 
-The original API key and personal account data are intentionally not included. The scripts use environment variables instead:
+## Tools Used
+
+| Tool | Purpose |
+| --- | --- |
+| Wireshark | Packet capture review and protocol analysis |
+| tcpdump | Capture collection from Linux |
+| curl | REST API testing from the command line |
+| python3 -m json.tool | JSON response formatting |
+| hcitool / gatttool | BLE discovery checks |
+| Govee Developer API | Owner-authorized device control testing |
+
+## Protocols and Services
+
+| Protocol | Port | Purpose |
+| --- | --- | --- |
+| HTTPS/TLS | TCP 443 | App-to-cloud and API communication |
+| MQTT over TLS | TCP 8883 | Cloud-to-device event and state messaging |
+| DNS | UDP 53 or encrypted resolver path | Hostname resolution depending on network configuration |
+| NTP | UDP 123 | Time synchronization for TLS/certificate validation |
+| BLE | N/A | Pairing and nearby device discovery |
+
+## Linux API Control, Sanitized Example
+
+The original project used owner-authorized API requests from Linux. This public version keeps credentials out of the repository and shows the pattern with environment variables.
 
 ```bash
-export GOVEE_API_KEY="your_api_key_here"
-export GOVEE_DEVICE_ID="your_device_id_here"
+export GOVEE_API_KEY="redacted"
+export GOVEE_DEVICE_ID="redacted"
 export GOVEE_MODEL="H6008"
 ```
 
-Then run a command such as:
+Representative request pattern:
 
 ```bash
-./scripts/turn_on.sh
+curl -s -X PUT \
+  -H "Govee-API-Key: ${GOVEE_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{"device":"'"${GOVEE_DEVICE_ID}"'","model":"'"${GOVEE_MODEL}"'","cmd":{"name":"turn","value":"on"}}' \
+  https://developer-api.govee.com/v1/devices/control | python3 -m json.tool
 ```
+
+## Security Analysis
+
+### What worked well
+
+- Application payloads were encrypted in transit.
+- Raw TLS packet replay was not successful.
+- The observed TLS configuration used a strong cipher suite.
+
+### What remained risky
+
+- The API key functioned as the primary control credential.
+- No client-side way was available to add nonce, timestamp, or per-request signing.
+- API-level replay was possible by resending the same valid request.
+- Cloud dependency creates an availability risk.
+- BLE advertisements continued to expose device presence nearby.
 
 ## Defensive Recommendations
 
-Recommended mitigations from the final milestone include:
+| Recommendation | Reason |
+| --- | --- |
+| Place IoT devices on a guest network or dedicated VLAN | Limits lateral movement if a device or account is compromised. |
+| Block IoT-to-main-LAN traffic | Prevents the bulb from reaching trusted endpoints. |
+| Allow only required outbound traffic | Reduces unnecessary network exposure. |
+| Store API keys outside source code | Prevents accidental credential leaks. |
+| Treat the API key like a password | Possession of the key can permit device control. |
+| Prefer local-control-capable devices for critical use cases | Reduces dependence on vendor cloud availability. |
 
-- Put IoT devices on a separate guest network or VLAN
-- Block IoT devices from reaching the main LAN
-- Allow only required outbound traffic such as HTTPS, DNS, and NTP
-- Treat the Govee API key like a password
-- Store API keys in environment variables instead of source code
-- Never commit real API keys, device identifiers, packet captures with secrets, or screenshots exposing credentials
+## Suggested IoT Firewall Policy
 
-## Notes
+| Rule | Direction | Protocol / Port | Destination | Purpose |
+| --- | --- | --- | --- | --- |
+| Allow HTTPS outbound | Outbound | TCP 443 | Internet | Govee cloud/API access |
+| Allow DNS outbound | Outbound | UDP/TCP 53 or local resolver | Router/DNS | Name resolution |
+| Allow NTP outbound | Outbound | UDP 123 | Internet or local NTP | Time sync |
+| Block main LAN access | Outbound | Any | RFC1918 internal networks | Prevent lateral movement |
+| Block unsolicited inbound | Inbound | Any | Bulb/IoT subnet | Prevent inbound access |
+| Deny all other traffic | Both | Any | Any | Default-deny baseline |
 
-This project is for defensive education, IoT security research, and portfolio demonstration. The included scripts reproduce legitimate owner-authorized control through the vendor API and do not contain credentials.
+## Portfolio Value
+
+This project demonstrates the ability to turn encrypted network traffic into useful security findings. The strongest analyst skill shown here is not simply using Wireshark, but explaining what can still be learned when payloads are encrypted: metadata, timing, protocol roles, cloud dependencies, and defensive implications.
+
+## Sanitization Notes
+
+This repository does not include real API keys, device identifiers, private packet captures, screenshots containing account data, or raw artifacts from the live environment.
