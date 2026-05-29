@@ -12,6 +12,7 @@ This repository collects a selection of hands-on labs completed by **Nicholas Le
 | [Lab 04 - Penetration Testing a pfSense Firewall](#lab-04--penetration-testing-a-pfsense-firewall) | Performs a structured penetration test against a pfSense firewall, including configuration review, Nessus and OpenVAS scanning, black-box testing with Nmap, and research on DMZ best practices. | Vulnerability assessment, penetration testing methodology, DMZ design |
 | [Assignment 2 - Malware Analysis](#assignment-2--malware-analysis) | Identifies a packed ransomware sample on a thumb drive, extracts autorun persistence keys, discovers embedded file paths and URLs, and traces the associated Bitcoin wallet address. | Static malware analysis, registry and file path enumeration, indicator extraction |
 | [IoT Govee Lightbulb Security Lab](iot-govee-lightbulb-security-lab/) | Analyzes a Govee H6008 Wi-Fi/BLE smart bulb, captures encrypted cloud traffic, reproduces legitimate control from Linux through the vendor API, tests replay behavior, and documents defensive recommendations. | IoT security, Wireshark, tcpdump, TLS analysis, REST API testing, MQTT, BLE, network segmentation |
+| [Malware Memory Hunting Capstone](malware-memory-hunting-capstone/) | Investigates a simulated enterprise breach involving SQL injection, malware discovery, packed executables, reverse engineering, hash verification, and XOR-encrypted data recovery. | Malware triage, YARA, PEiD, UPX, Cutter, Bstrings, HashMyFiles, static analysis, reverse engineering |
 
 ## Lab 01 - Configuring a VPN with pfSense
 
@@ -48,3 +49,9 @@ This assignment showcases basic static malware analysis skills. Nicholas inspect
 **Folder:** `iot-govee-lightbulb-security-lab/`
 
 This project analyzes a Govee H6008 Wi-Fi + Bluetooth RGBWW smart bulb as a consumer IoT security target. The work includes device setup, network architecture design, packet capture analysis, protocol identification, owner-authorized Linux control through the Govee Developer API, TLS and replay testing, and defensive recommendations for safer deployment. The project demonstrates practical experience with Wireshark, tcpdump, curl, HTTPS, MQTT over TLS, BLE discovery, API key handling, cloud-mediated IoT architectures, and IoT network segmentation.
+
+## Malware Memory Hunting Capstone
+
+**Folder:** `malware-memory-hunting-capstone/`
+
+This capstone documents an end-to-end malware analysis investigation in a simulated enterprise breach. The work includes identifying SQL injection evidence, locating malicious executables with YARA, extracting embedded indicators with Bstrings, identifying and unpacking UPX-packed malware, reverse engineering hardcoded logic in Cutter, verifying renamed tools with file hashes, and recovering XOR-encrypted data in a controlled lab setting. The public version is sanitized and excludes raw malware samples, decrypted customer data, and sensitive artifacts.
