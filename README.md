@@ -1,57 +1,28 @@
 # Security Labs Portfolio
 
-This repository collects a selection of hands-on labs completed by **Nicholas Leoncito** during various information security courses. Each lab demonstrates practical skills in networking, cryptography, penetration testing, malware analysis, IoT security, and defensive analysis. The aim of this portfolio is to showcase technical experience and problem-solving abilities for prospective employers.
+This portfolio highlights hands-on cybersecurity projects focused on malware analysis, IoT security, packet analysis, defensive recommendations, and technical investigation. The emphasis is on browser-readable writeups, clear findings, and analyst-style documentation rather than raw coursework uploads.
 
-## Contents
+## Featured Projects
 
-| Lab | Description | Skills Demonstrated |
+| Project | What It Demonstrates | Skills |
 | --- | --- | --- |
-| [Lab 01 - Configuring a VPN with pfSense](#lab-01--configuring-a-vpn-with-pfsense) | Configures certificate authorities, server certificates, IPsec tunnels, pre-shared keys, OpenVPN, and firewall rules on a pfSense firewall. | VPN configuration, certificate management, firewall rule tuning |
-| [Lab 02 - Encryption and Hashing](#lab-02--encryption-and-hashing) | Uses GnuPG to generate public and private keys for two users, encrypts and decrypts messages, and demonstrates MD5 and SHA1 hashing with integrity checks. | Public-key cryptography, hashing, command-line Linux tools |
-| [Lab 03 - Ethernet and ARP Analysis](#lab-03--ethernet-and-arp-analysis) | Inspects IP configuration, routing tables and ARP caches, captures ARP traffic with Wireshark and analyzes request-reply behaviour. | Network analysis, packet capture, ARP protocol understanding |
-| [Lab 04 - Penetration Testing a pfSense Firewall](#lab-04--penetration-testing-a-pfsense-firewall) | Performs a structured penetration test against a pfSense firewall, including configuration review, Nessus and OpenVAS scanning, black-box testing with Nmap, and research on DMZ best practices. | Vulnerability assessment, penetration testing methodology, DMZ design |
-| [Assignment 2 - Malware Analysis](#assignment-2--malware-analysis) | Identifies a packed ransomware sample on a thumb drive, extracts autorun persistence keys, discovers embedded file paths and URLs, and traces the associated Bitcoin wallet address. | Static malware analysis, registry and file path enumeration, indicator extraction |
-| [IoT Govee Lightbulb Security Lab](iot-govee-lightbulb-security-lab/) | Analyzes a Govee H6008 Wi-Fi/BLE smart bulb, captures encrypted cloud traffic, reproduces legitimate control from Linux through the vendor API, tests replay behavior, and documents defensive recommendations. | IoT security, Wireshark, tcpdump, TLS analysis, REST API testing, MQTT, BLE, network segmentation |
-| [Malware Memory Hunting Capstone](malware-memory-hunting-capstone/) | Investigates a simulated enterprise breach involving SQL injection, malware discovery, packed executables, reverse engineering, hash verification, and XOR-encrypted data recovery. | Malware triage, YARA, PEiD, UPX, Cutter, Bstrings, HashMyFiles, static analysis, reverse engineering |
+| [IoT Govee Lightbulb Security Lab](iot-govee-lightbulb-security-lab/) | Analyzed a Govee H6008 Wi-Fi/BLE smart bulb, captured encrypted cloud traffic, reproduced owner-authorized control through the vendor API, tested replay behavior, and wrote practical network segmentation recommendations. | IoT security, Wireshark, tcpdump, TLS analysis, REST API testing, MQTT, BLE, API key handling, network segmentation |
+| [Malware Memory Hunting Capstone](malware-memory-hunting-capstone/) | Investigated a simulated enterprise breach involving SQL injection, malware discovery, packed executables, reverse engineering, hash verification, and XOR-encrypted data recovery. | Malware triage, YARA, PEiD, UPX, Cutter, Bstrings, HashMyFiles, static analysis, reverse engineering, incident reconstruction |
 
-## Lab 01 - Configuring a VPN with pfSense
+## Coursework Archive
 
-**File:** `Leoncito_Wdf712_3423_L01.pdf`
+These older labs are retained as supporting evidence of fundamentals. They are intentionally secondary to the featured projects above.
 
-In this lab Nicholas configured a pfSense firewall to provide secure remote access. The tasks included creating a certificate authority and server certificate, configuring IPsec VPN tunnels with appropriate phase 1 and phase 2 parameters, adding pre-shared keys, and tuning firewall rules to permit VPN traffic. He also used the pfSense OpenVPN wizard to set up an OpenVPN service, defined client and tunnel settings, and verified firewall rules on the WAN and OpenVPN interfaces. Finally, he enabled the Mobility and Multihoming (MOBIKE) option and manually created firewall rules for IPsec. Through this exercise he gained practical experience in deploying VPN services and hardening firewall configurations.
+| Lab | Summary | Skills |
+| --- | --- | --- |
+| Configuring a VPN with pfSense | Built VPN services and firewall rules using pfSense, including IPsec, OpenVPN, certificates, and rule tuning. | VPN configuration, certificates, firewall administration |
+| Encryption and Hashing | Used GnuPG, RSA keys, MD5, and SHA1 to demonstrate confidentiality and integrity concepts. | Public-key cryptography, hashing, Linux CLI |
+| Ethernet and ARP Analysis | Captured and analyzed ARP behavior while reviewing IP configuration, routing, and local network resolution. | Wireshark, packet analysis, ARP, routing basics |
+| Penetration Testing a pfSense Firewall | Reviewed firewall configuration, ran vulnerability scans, performed black-box testing, and documented hardening recommendations. | Vulnerability assessment, Nmap, Nessus/OpenVAS, firewall review |
+| Static Malware Analysis Assignment | Analyzed a packed ransomware-style sample, identified persistence indicators, extracted embedded strings, and documented IOCs. | Static malware analysis, string extraction, IOC development |
 
-## Lab 02 - Encryption and Hashing
+## Portfolio Notes
 
-**File:** `leoncito_wdf712_3423_lo2.pdf`
-
-This lab focused on applied cryptography. Using GnuPG on a Linux system, Nicholas generated RSA key pairs for two users (Student and Instructor) and exchanged public keys to enable secure communication. He created MD5 and SHA1 hashes for a text file, saved the hashes to `.md5` and `.sha1` files, and demonstrated how modifying the file produced different hash values. When generating the keys he resolved an entropy shortage by running an entropy script and using the system to produce additional randomness. The lab also required research comparing RSA and ECDSA encryption, summarizing the trade-offs between security and efficiency. These tasks reinforced concepts of confidentiality, integrity and authenticity in secure communications.
-
-## Lab 03 - Ethernet and ARP Analysis
-
-**File:** `Leoncito-IS3413_Lab-03.pdf`
-
-In this network analysis lab Nicholas examined Ethernet and the Address Resolution Protocol (ARP). He began by using `ipconfig` and `netstat -r` to inspect IP settings and routing tables, then displayed the local ARP cache with `arp -a`. Capturing live traffic with Wireshark, he filtered for ARP packets and selected traffic between his computer's ASRock network interface and his router. By analyzing request and reply messages he explained how ARP resolves IP addresses to MAC addresses without broadcasting to all devices. The lab concluded with reflections on limitations and the importance of precise network segmentation.
-
-## Lab 04 - Penetration Testing a pfSense Firewall
-
-**File:** `leoncito_wdf712_3423_L04.docx`
-
-This extensive lab simulated a real-world penetration test against a network protected by a pfSense firewall. Nicholas began with a configuration analysis of Virtual IPs, NAT rules and firewall rules, removing unnecessary exposures. He ran a Nessus vulnerability scan, tightened rules based on the findings, and confirmed the improvements with a follow-up scan. He then conducted black-box testing by scanning the firewall with Nmap and OpenVAS to identify open services from an attacker's perspective. Finally, he researched DMZ best practices and recommended stronger segmentation and access control for public-facing services. The report includes recommendations for ongoing hardening and demonstrates proficiency in both vulnerability assessment tools and secure network design.
-
-## Assignment 2 - Malware Analysis
-
-**File:** `Assignment2_wdf712_is4533.docx`
-
-This assignment showcases basic static malware analysis skills. Nicholas inspected a collection of executables from a compromised thumb drive and used PEiD to identify `raaserver.exe` as a packed malware sample linked to the OnyxCrew ransomware family. After unpacking the executable he extracted its autorun persistence registry key, discovered the embedded Windows file path `c:\\OnyxCrew\\ransware\\raserver\\release` and located a hard-coded URL pointing to a QR code with a Bitcoin payment address. By calculating the wallet's approximate USD value he demonstrated an understanding of ransom demands. The assignment reflects familiarity with common malware packing indicators and techniques for extracting indicators of compromise.
-
-## IoT Govee Lightbulb Security Lab
-
-**Folder:** `iot-govee-lightbulb-security-lab/`
-
-This project analyzes a Govee H6008 Wi-Fi + Bluetooth RGBWW smart bulb as a consumer IoT security target. The work includes device setup, network architecture design, packet capture analysis, protocol identification, owner-authorized Linux control through the Govee Developer API, TLS and replay testing, and defensive recommendations for safer deployment. The project demonstrates practical experience with Wireshark, tcpdump, curl, HTTPS, MQTT over TLS, BLE discovery, API key handling, cloud-mediated IoT architectures, and IoT network segmentation.
-
-## Malware Memory Hunting Capstone
-
-**Folder:** `malware-memory-hunting-capstone/`
-
-This capstone documents an end-to-end malware analysis investigation in a simulated enterprise breach. The work includes identifying SQL injection evidence, locating malicious executables with YARA, extracting embedded indicators with Bstrings, identifying and unpacking UPX-packed malware, reverse engineering hardcoded logic in Cutter, verifying renamed tools with file hashes, and recovering XOR-encrypted data in a controlled lab setting. The public version is sanitized and excludes raw malware samples, decrypted customer data, and sensitive artifacts.
+- Public writeups are sanitized and do not include raw malware, decrypted customer data, private packet captures, credentials, API keys, or sensitive screenshots.
+- The strongest projects are written in Markdown so reviewers can evaluate them directly in the browser.
+- Older coursework artifacts are preserved as background, but the featured projects should be treated as the primary portfolio evidence.
